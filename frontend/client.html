@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Click&Clean — Клиент</title>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+
+<body data-page="client">
+  <!-- HEADER -->
+  <header class="container header">
+    <div class="brand">
+      <div style="width:40px;height:40px;border-radius:12px;background:#f2fff8;display:grid;place-items:center;">🧺</div>
+      <span class="brand-title">Click&Clean</span>
+    </div>
+    <nav class="nav">
+      <a href="./index.html">Главная</a>
+      <a href="./orders.html">Заказы</a>
+      <a href="./client.html">Клиент</a>
+    </nav>
+    <div class="header-actions">
+      <button id="logout-btn" class="btn btn--ghost">Выйти</button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="container">
+    <h1>Создать заказ</h1>
+
+    <section class="glass">
+      <form id="orderForm">
+        <div class="form">
+          <div class="row">
+            <label>Район</label>
+            <select id="district" required></select>
+          </div>
+
+          <div class="row">
+            <label>Адрес</label>
+            <input id="address" placeholder="Улица, дом, квартира" required>
+          </div>
+
+          <div class="row">
+            <label>Дата</label>
+            <input id="date" type="date" required>
+          </div>
+
+          <div class="row">
+            <label>Время</label>
+            <select id="slot" required></select>
+          </div>
+
+          <div class="row">
+            <label>Комментарий</label>
+            <textarea id="comment" placeholder="Подъезд, этаж, код домофона и т.д."></textarea>
+          </div>
+
+          <div class="row">
+            <label>Вознаграждение (₸)</label>
+            <input id="amount" type="number" min="500" step="100" value="1000" required>
+          </div>
+
+          <button class="btn" type="submit">Создать заказ</button>
+        </div>
+      </form>
+    </section>
+
+    <h2 style="margin-top:30px;">Мои заказы</h2>
+    <div id="myOrders" class="orders-mobile"></div>
+  </main>
+
+  <nav class="mobile-tabbar">
+    <a href="./index.html" data-tab="home">🏠<span>Главная</span></a>
+    <a href="./orders.html" data-tab="orders">📦<span>Заказы</span></a>
+    <a href="./client.html" data-tab="client" class="active">👤<span>Клиент</span></a>
+    <a href="./courier.html" data-tab="courier">🛵<span>Курьер</span></a>
+  </nav>
+
+  <script type="module">
+    import { createOrder, getDistricts, getSlots, me } from './js/api.js';
+
+    const $ = s => document.querySelector(s);
+    const districtEl = $('#district');
+    const slotEl = $('#slot');
+    const ordersBox = $('#myOrders');
+
+    // ======= Проверка авторизации =======
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Пожалуйста, войдите в аккаунт');
+      window.location.href = './index.html';
+    }
+
+    // ======= Выход =======
+    $('#logout-btn')?.addEventListener('click', () => {
+      localStorage.clear();
+      window.location.href = './index.html';
+    });
+
+    // ======= Подгрузка метаданных =======
+    async function loadMeta() {
+  try {
+    const [districts, slots] = await Promise.all([getDistricts(), getSlots()]);
+    console.log("📦 Районы:", districts);
+    console.log("🕓 Слоты:", slots);
+
+    districtEl.innerHTML = districts.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+    slotEl.innerHTML = slots.map(s => `<option value="${s.value}">${s.label}</option>`).join('');
+  } catch (err) {
+    console.error("❌ Ошибка при загрузке метаданных:", err);
+    alert("Не удалось загрузить данные. Проверь, запущен ли backend (python manage.py runserver).");
+  }
+}
+
+
+    // ======= Создание заказа =======
+    $('#orderForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const payload = {
+    district: Number($('#district').value),
+    address: $('#address').value.trim(),
+    date: $('#date').value,
+    slot: $('#slot').value,
+    comment: $('#comment').value.trim(),
+    amount: Number($('#amount').value),
+  };
+
+  try {
+    console.log("📤 Отправляем заказ:", payload);
+
+    const res = await createOrder(payload);
+
+    console.log("📩 Ответ сервера:", res);
+
+    if (res && res.id) {
+      alert('✅ Заказ успешно создан!');
+      e.target.reset();
+      loadMyOrders();
+    } else if (res && res.detail) {
+      alert('❌ Ошибка: ' + res.detail);
+    } else {
+      alert('⚠️ Не удалось создать заказ. Подробности смотри в консоли.');
+    }
+  } catch (err) {
+    console.error('🚨 Ошибка при создании заказа:', err);
+    alert('Произошла ошибка при отправке запроса.');
+  }
+});
+
+
+
+    // ======= Загрузка своих заказов =======
+    async function loadMyOrders() {
+      const r = await fetch('http://127.0.0.1:8000/api/my/orders', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await r.json();
+
+      if (!Array.isArray(data) || data.length === 0) {
+        ordersBox.innerHTML = `
+          <div class="empty">
+            <div style="font-size:64px;">🧺</div>
+            <h3>Пока заказов нет</h3>
+            <p>Создайте первый заказ — он появится здесь</p>
+          </div>`;
+        return;
+      }
+
+      ordersBox.innerHTML = data.map(o => `
+        <article class="order-card">
+          <h4>#${o.id} — ${o.amount} ₸</h4>
+          <div class="order-meta">
+            <div><b>Адрес:</b> ${o.address}</div>
+            <div><b>Район:</b> ${o.district_name || '—'}</div>
+            <div><b>Дата:</b> ${o.date || '—'}</div>
+            <div><b>Слот:</b> ${o.slot || '—'}</div>
+            <div><b>Статус:</b> ${o.status || 'new'}</div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+  console.log("✅ DOM загружен, инициализация...");
+  loadMeta();
+  document.querySelector('.form').classList.add('active');
+  loadMyOrders();
+});
+  </script>
+</body>
+</html>

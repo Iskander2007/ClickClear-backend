@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Список заказов — Click&Clean</title>
+    <link rel="stylesheet" href="./css/style.css" />
+</head>
+
+<body data-page="orders">
+    <header class="container header">
+        <div class="brand">
+            <div style="width:40px;height:40px;border-radius:12px;background:#f2fff8;display:grid;place-items:center;">
+                📦</div><span class="brand-title">Click&Clean</span>
+        </div>
+        <nav class="nav"><a href="./index.html">Главная</a><a href="./client.html">Клиент</a><a
+                href="./courier.html">Курьер</a></nav>
+        <div class="header-actions"><button id="open-auth" class="btn btn--ghost">Вход / Регистрация</button><button
+                id="to-cabinet" class="btn" hidden>В кабинет</button><button id="logout-btn" class="btn btn--ghost"
+                hidden>Выйти</button></div>
+    </header>
+
+    <main class="container">
+        <section class="glass">
+            <h1>Список заказов</h1>
+            <p class="muted">Все заявки в одном месте. Фильтры по статусу — ниже.</p>
+            <div class="filters">
+                <button class="chip" data-filter="all">Все</button>
+                <button class="chip" data-filter="new">Новые</button>
+                <button class="chip" data-filter="active">В пути</button>
+                <button class="chip" data-filter="done">Завершённые</button>
+            </div>
+
+            <div id="orders-mobile" class="orders-mobile"></div>
+
+            <table class="orders-table" aria-label="Таблица заказов">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Клиент</th>
+                        <th>Адрес</th>
+                        <th>Район</th>
+                        <th>Статус</th>
+                        <th>Когда</th>
+                        <th>Курьер</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-body"></tbody>
+            </table>
+        </section>
+    </main>
+
+    <nav class="mobile-tabbar">
+        <a href="./index.html" data-tab="home">🏠<span>Главная</span></a>
+        <a href="./orders.html" data-tab="orders">📦<span>Заказы</span></a>
+        <a href="./client.html" data-tab="client">👤<span>Клиент</span></a>
+        <a href="./courier.html" data-tab="courier">🛵<span>Курьер</span></a>
+    </nav>
+
+    <div>
+      <select id="filterDistrict"></select>
+      <input id="minAmount" type="number" min="500" step="50" placeholder="от">
+      <button id="apply">Применить</button>
+    </div>
+    <ul id="feed"></ul>
+
+    <script type="module">
+        import { getDistricts, getFeed, takeOrder } from './js/api.js';
+        const $ = s => document.querySelector(s);
+        const list = $('#feed');
+
+        async function loadFilters() {
+          const districts = await getDistricts();
+          $('#filterDistrict').innerHTML = `<option value="">Все районы</option>` +
+            districts.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+        }
+        loadFilters();
+
+        async function renderFeed(params={}) {
+          const data = await getFeed(params);
+          list.innerHTML = data.results?.map(o => `
+            <li data-id="${o.id}">
+              <b>${o.amount} ₸</b> — ${o.address} — ${o.district_name} — ${o.slot}
+              <button class="take">Взять</button>
+            </li>
+          `).join('') || '<li>Нет заказов</li>';
+        }
+        renderFeed();
+
+        $('#apply').addEventListener('click', () => {
+          const params = {};
+          const d = $('#filterDistrict').value;
+          const m = $('#minAmount').value;
+          if (d) params.district = d;
+          if (m) params.min_amount = m;
+          renderFeed(params);
+        });
+
+        list.addEventListener('click', async (e) => {
+          if (e.target.classList.contains('take')) {
+            const id = Number(e.target.closest('li').dataset.id);
+            const res = await takeOrder(id);
+            alert(res.ok ? 'Заказ взят' : (res.detail || JSON.stringify(res)));
+            renderFeed();
+          }
+        });
+    </script>
+
+    <script src="./js/app.js" defer></script>
+    <script type="module" src="./js/api.js"></script>
+</body>
+
+</html>

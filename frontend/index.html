@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Click&Clean — Умный вынос мусора</title>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+
+<body data-page="home">
+  <!-- HEADER -->
+  <header class="container header">
+    <div class="brand">
+      <div style="width:40px;height:40px;border-radius:12px;background:#f2fff8;display:grid;place-items:center;">🧺</div>
+      <span class="brand-title">Click&Clean</span>
+    </div>
+    <nav class="nav">
+      <a href="./index.html">Главная</a>
+      <a href="#how">Как это работает</a>
+      <a href="./orders.html">Заказы</a>
+    </nav>
+    <div class="header-actions">
+      <button id="open-auth" class="btn btn--ghost">Вход / Регистрация</button>
+      <button id="to-cabinet" class="btn" hidden>В кабинет</button>
+      <button id="logout-btn" class="btn btn--ghost" hidden>Выйти</button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <main class="container">
+    <section class="hero fade-in">
+      <div>
+        <h1>Вы нажимаете — мы вывозим</h1>
+        <p class="lead">Быстрый заказ, понятные статусы, вежливые курьеры.</p>
+        <div class="cta-row">
+          <button class="btn" id="open-auth-hero">Попробовать бесплатно</button>
+          <a class="btn btn--ghost" href="#how">Как это работает</a>
+        </div>
+
+        <div class="info-stripe">
+          <div class="info-tile">
+            <div class="icon">⏰</div>
+            <div><b>15:00–17:00</b><span class="muted">Ежедневно, без выходных</span></div>
+          </div>
+          <div class="info-tile">
+            <div class="icon">🚚</div>
+            <div><b>7 районов Алматы</b><span class="muted">Алмалинский, Бостандыкский и др.</span></div>
+          </div>
+          <div class="info-tile">
+            <div class="icon">🌱</div>
+            <div><b>Экологично</b><span class="muted">Раздельный сбор и аккуратность</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="hero__media"><div style="font-size:120px;">🚛</div></div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how" class="glass fade-in">
+      <h2>Как это работает</h2>
+      <div class="steps">
+        <div class="step"><div class="num">1</div><b>Зарегистрируйтесь</b><div class="muted">Клиент или курьер</div></div>
+        <div class="step"><div class="num">2</div><b>Создайте заказ</b><div class="muted">Адрес, район, время</div></div>
+        <div class="step"><div class="num">3</div><b>Курьер в пути</b><div class="muted">Отслеживайте статус</div></div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="cards fade-in">
+      <article class="card">
+        <div class="card__img"><div style="font-size:80px;">⏱️</div></div>
+        <h3>Чёткие окна</h3>
+        <p class="muted">Выбирайте слот — курьер приезжает вовремя.</p>
+      </article>
+      <article class="card">
+        <div class="card__img"><div style="font-size:80px;">🧼</div></div>
+        <h3>Аккуратно и чисто</h3>
+        <p class="muted">Бережно работаем в подъездах и дворах.</p>
+      </article>
+      <article class="card">
+        <div class="card__img"><div style="font-size:80px;">📦</div></div>
+        <h3>Понятные статусы</h3>
+        <p class="muted">Новый → В пути → Завершён.</p>
+      </article>
+    </section>
+  </main>
+
+  <!-- MOBILE TABBAR -->
+  <nav class="mobile-tabbar">
+    <a href="./index.html" data-tab="home">🏠<span>Главная</span></a>
+    <a href="./orders.html" data-tab="orders">📦<span>Заказы</span></a>
+    <a href="./client.html" data-tab="client">👤<span>Клиент</span></a>
+    <a href="./courier.html" data-tab="courier">🛵<span>Курьер</span></a>
+  </nav>
+
+  <!-- AUTH MODAL -->
+  <div class="modal-overlay" id="auth-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="close" id="auth-close" aria-label="Закрыть">✖</button>
+      <h2 id="auth-title">Вход</h2>
+
+      <div class="tabs">
+        <button id="tab-login" class="tab active">Вход</button>
+        <button id="tab-register" class="tab">Регистрация</button>
+      </div>
+
+      <div id="role-select" class="role-select">
+        <label><input type="radio" name="role" value="client" checked> Клиент</label>
+        <label><input type="radio" name="role" value="courier"> Курьер</label>
+      </div>
+
+      <form id="form-login" class="form active">
+        <div class="row"><label>Email</label><input id="login-email" type="email" required></div>
+        <div class="row"><label>Пароль</label><input id="login-pass" type="password" required></div>
+        <button class="btn" type="submit">Войти</button>
+      </form>
+
+      <form id="form-register" class="form">
+        <div class="row"><label>Имя</label><input id="reg-name" required></div>
+        <div class="row"><label>Email</label><input id="reg-email" type="email" required></div>
+        <div class="row"><label>Пароль</label><input id="reg-pass" type="password" required></div>
+        <p class="hint">Выберите роль выше (клиент/курьер)</p>
+        <button class="btn" type="submit">Создать аккаунт</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
