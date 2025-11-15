@@ -16,17 +16,22 @@ if USE_SQLITE:
         }
     }
 else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.mysql",
-            "NAME": os.getenv("MYSQL_DB", "clickclear"),
-            "USER": os.getenv("MYSQL_USER", "root"),
-            "PASSWORD": os.getenv("MYSQL_PASSWORD", ""),
-            "HOST": os.getenv("MYSQL_HOST", "127.0.0.1"),
-            "PORT": os.getenv("MYSQL_PORT", "3306"),
-            "OPTIONS": {"charset": "utf8mb4"},
-        }
-    }
+        import dj_database_url
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.environ.get("DATABASE_URL")
+    )
+}
+ #DATABASES = {
+        #"default": {
+            #"ENGINE": "django.db.backends.mysql",
+            #"NAME": os.getenv("MYSQL_DB", "clickclear"),
+            #"USER": os.getenv("MYSQL_USER", "root"),
+            #"PASSWORD": os.getenv("MYSQL_PASSWORD", ""),
+            #"HOST": os.getenv("MYSQL_HOST", "127.0.0.1"),
+           # "PORT": os.getenv("MYSQL_PORT", "3306"),
+          #  "OPTIONS": {"charset": "utf8mb4"},#
 
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret")
 DEBUG = os.getenv("DEBUG", "1") == "1"
