@@ -33,6 +33,7 @@ DATABASES = {
            # "PORT": os.getenv("MYSQL_PORT", "3306"),
           #  "OPTIONS": {"charset": "utf8mb4"},#
 
+
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret")
 DEBUG = os.getenv("DEBUG", "1") == "1"
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
